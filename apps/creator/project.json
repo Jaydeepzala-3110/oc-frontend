@@ -1,0 +1,46 @@
+{
+  "name": "creator",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/creator",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/creator"
+      },
+      "configurations": {
+        "development": {
+          "outputPath": "apps/creator"
+        },
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/next:server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "creator:build",
+        "dev": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "creator:build:development",
+          "dev": true,
+          "port": 3001
+        },
+        "production": {
+          "buildTarget": "creator:build:production",
+          "dev": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    }
+  },
+  "tags": []
+}

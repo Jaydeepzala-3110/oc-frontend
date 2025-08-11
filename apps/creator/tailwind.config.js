@@ -17,25 +17,7 @@ module.exports = {
     //     ...createGlobPatternsForDependencies(__dirname)
   ],
   theme: {
-    extend: {
-      colors: {
-        'brand-teal': '#14b8a6',
-        'brand-blue': '#3b82f6',
-        'brand-blue': '#0B3D91',
-      },
-      fontFamily: {
-        'lexend-deca': ['"Lexend Deca"', 'sans-serif'],
-      },
-      keyframes: {
-        'fade-in-up': { '0%': { opacity: 0, transform: 'translateY(30px)' }, '100%': { opacity: 1, transform: 'translateY(0)' } },
-        'fade-in-right': { '0%': { opacity: 0, transform: 'translateX(30px)' }, '100%': { opacity: 1, transform: 'translateX(0)' } },
-      },
-      animation: {
-        'fade-in-up': 'fade-in-up 0.8s ease-out forwards',
-        'fade-in-right': 'fade-in-right 0.8s ease-out 0.3s both',
-      },
-    },
+    extend: {},
   },
   plugins: [],
 };
-
