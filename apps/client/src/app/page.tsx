@@ -1,4 +1,3 @@
-import Banner from '@/components/home/Banner';
 import Faqs from '@/components/home/Faqs';
 import HowItWork from '@/components/home/HowItWork';
 import Testimonials from '@/components/home/Testimonials';
@@ -16,7 +15,6 @@ export default function Index() {
     <main>
       <Header />
       <HeroSection />
-      {/* <Banner /> */}
       <BrandCarousel />
       <HowItWork />
       <Metrics />
