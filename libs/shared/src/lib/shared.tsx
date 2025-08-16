@@ -1,6 +1,6 @@
 export function OnlyCreatorsShared() {
   return (
-    <div className={styles['container']}>
+    <div>
       <h1>Welcome to OnlyCreatorsShared!</h1>
     </div>
   );

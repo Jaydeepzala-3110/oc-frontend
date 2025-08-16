@@ -9,6 +9,7 @@ import Benefits from '@/components/home/Benefits';
 import CtaBanner from '@/components/home/CtaBanner';
 import Header from '@/components/home/Header';
 import HeroSection from '@/components/home/HeroSection';
+import GoalCards from '@/components/home/GoalCards';
 
 export default function Index() {
   return (
@@ -17,7 +18,8 @@ export default function Index() {
       <HeroSection />
       <BrandCarousel />
       <HowItWork />
-      <Metrics />
+      {/* <Metrics /> */}
+      <GoalCards />
       <FeaturedCampaigns />
       <Testimonials />
       <Benefits />
