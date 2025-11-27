@@ -1,174 +1,103 @@
-'use client';
-import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Workflow } from 'lucide-react'; // Lucide icon for Pill
+"use client";
+
+import { Upload, Scan, CheckCircle2, TrendingUp, DollarSign, Zap } from "lucide-react";
 
 const steps = [
   {
-    title: 'Choose Campaign',
-    desc: 'Browse live deals that fit your style and preferences',
-    icon: '📱',
+    icon: Upload,
+    title: "Upload your reel",
+    description: "Drag and drop your short-form video content directly to the platform.",
   },
   {
-    title: 'Create Content',
-    desc: 'Produce engaging short-form video content for your audience',
-    icon: '🎥',
+    icon: Scan,
+    title: "AI extracts frames",
+    description: "Our system automatically processes video frames for analysis.",
   },
   {
-    title: 'Submit & Review',
-    desc: 'Our team ensures your content meets quality standards',
-    icon: '✅',
+    icon: Zap,
+    title: "Logo detection",
+    description: "YOLOv8 + Vision API identifies brand logos with high precision.",
   },
   {
-    title: 'Get Paid',
-    desc: 'Earn per 1,000 real views with transparent tracking',
-    icon: '💰',
+    icon: CheckCircle2,
+    title: "Verification completed",
+    description: "Content is flagged as compliant and ready for monetization.",
+  },
+  {
+    icon: TrendingUp,
+    title: "Views tracked automatically",
+    description: "Real-time synchronization with social platforms every 15 minutes.",
+  },
+  {
+    icon: DollarSign,
+    title: "Earnings calculated",
+    description: "Revenue is updated instantly based on verified view counts.",
   },
 ];
 
-export default function HowItWorks() {
-  const sectionRef = useRef(null);
-  const [activeIndex, setActiveIndex] = useState<null | number>(null);
-  const demoRef = useRef(null);
-
-  useEffect(() => {
-    return () => {
-      if (demoRef.current) clearInterval(demoRef.current);
-    };
-  }, []);
-
-  const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
-    const rect = el.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    const rx = (y - 0.5) * 12;
-    const ry = (x - 0.5) * -12;
-    el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(12px) ${
-      activeIndex === Number(el.dataset.index) ? 'scale(1.02)' : ''
-    }`;
-    el.style.transition = 'transform .18s cubic-bezier(.2,.9,.3,1)';
-  };
-
-  const handleLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
-    el.style.transform = '';
-    el.style.transition = 'transform .28s cubic-bezier(.2,.9,.3,1)';
-  };
-
+export default function HowItWork() {
   return (
-    <section
-      ref={sectionRef}
-      className="relative py-24 overflow-hidden bg-gradient-to-b from-cyan-400 to-fuchsia-500"
-    >
-      {/* Snake Gradient Background */}
-      {/* Snake Gradient Background - horizontal on md+, vertical on mobile */}
-      <div className="absolute left-0 right-0 top-0 h-full pointer-events-none z-0">
-        {/* Horizontal (desktop / tablet) */}
-        <svg
-          className="hidden md:block w-full h-full"
-          viewBox="0 0 1200 220"
-          preserveAspectRatio="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <linearGradient id="g1" x1="0%" x2="100%">
-              <stop offset="0%" stopColor="#7b61ff" />
-              <stop offset="50%" stopColor="#22d3ee" />
-              <stop offset="100%" stopColor="#ff7ab6" />
-            </linearGradient>
-          </defs>
-
-          <path
-            d="M60 140 C240 30, 360 220, 540 140 C720 60, 840 220, 1140 100"
-            stroke="url(#g1)"
-            strokeWidth="30"
-            fill="none"
-            strokeOpacity="0.95"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="filter drop-shadow-[0_12px_18px_rgba(123,97,255,0.25)]"
-          />
-          <path
-            d="M60 140 C240 30, 360 220, 540 140 C720 60, 840 220, 1140 100"
-            stroke="rgba(255,255,255,0.12)"
-            strokeWidth="10"
-            fill="none"
-            strokeDasharray="30 120"
-            strokeLinecap="round"
-          >
-            <animate
-              attributeName="stroke-dashoffset"
-              values="0; -150; -300"
-              dur="6s"
-              repeatCount="indefinite"
-            />
-          </path>
-        </svg>
-      </div>
-
-      {/* Header */}
-      <div className="relative z-10 text-center mb-12">
-        <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-1 rounded-full border border-white/30 text-white font-medium shadow-lg">
-          <Workflow size={16} />
-          Process
-        </div>
-        <h2
-          className="relative mt-10 text-3xl md:text-5xl font-extrabold text-white drop-shadow-[0_4px_6px_rgba(0,0,0,0.5)] tracking-wide"
-          style={{
-            WebkitTextStroke: '1px rgba(255,255,255,0.4)',
-            //         textShadow: `
-            //   0 0 8px rgba(34,211,238,0.8),
-            //   0 0 16px rgba(34,211,238,0.6),
-            //   0 0 24px rgba(236,72,153,0.6)
-            // `,
-          }}
-        >
-          How <span className="text-cyan-300">OnlyCreator</span> Works
-        </h2>
-      </div>
-
-      {/* Steps */}
-      <div className="max-w-6xl mx-auto px-4 relative z-10 mt-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
-          {steps.map((step, idx) => {
-            const isActive = activeIndex === idx;
-            return (
-              <motion.div
-                key={idx}
-                data-index={idx}
-                onMouseMove={handleMove}
-                onMouseLeave={handleLeave}
-                onMouseEnter={() => setActiveIndex(idx)}
-                className="relative overflow-hidden rounded-xl p-6 flex flex-col items-center justify-center text-center bg-black/40 border border-white/20 backdrop-blur-md shadow-xl transition-all w-[260px] h-[280px]"
-                style={{
-                  transform: isActive
-                    ? 'translateY(-8px) scale(1.02)'
-                    : undefined,
-                  boxShadow: isActive
-                    ? '0 20px 50px rgba(34,211,238,0.2), 0 6px 18px rgba(2,6,23,0.6)'
-                    : undefined,
-                }}
-              >
-                <div
-                  className="w-16 h-16 rounded-full flex items-center justify-center text-3xl"
-                  style={{
-                    background: 'linear-gradient(135deg,#7b61ff,#22d3ee)',
-                    boxShadow:
-                      '0 6px 18px rgba(0,0,0,0.5), 0 2px 8px rgba(255,255,255,0.05) inset',
-                  }}
-                >
-                  {step.icon}
+    <section id="how-it-works" className="py-24 bg-white dark:bg-background border-t border-gray-100 dark:border-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-16 items-start">
+          {/* Left Content */}
+          <div className="lg:sticky lg:top-32">
+            <h2 className="text-3xl font-semibold text-gray-900 dark:text-foreground mb-6">
+              How it works
+            </h2>
+            <p className="text-lg text-gray-500 dark:text-muted-foreground mb-8 leading-relaxed">
+              We've streamlined the entire process from upload to payout. Our AI handles the heavy
+              lifting so you can focus on creating content.
+            </p>
+            <div className="p-6 bg-gray-50 dark:bg-muted rounded-2xl border border-gray-100 dark:border-border">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-10 h-10 rounded-full bg-white dark:bg-card border border-gray-200 dark:border-border flex items-center justify-center text-gray-900 dark:text-foreground font-bold">
+                  AI
                 </div>
-                <h3 className="text-lg font-bold text-white mt-4 drop-shadow-lg">
-                  {step.title}
-                </h3>
-                <p className="text-sm text-slate-200 leading-relaxed mt-2 drop-shadow-md">
-                  {step.desc}
-                </p>
-              </motion.div>
-            );
-          })}
+                <div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-foreground">
+                    Automated Workflow
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-muted-foreground">
+                    Zero manual intervention required
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-2 w-full bg-gray-200 dark:bg-muted rounded-full overflow-hidden">
+                  <div className="h-full w-3/4 bg-gray-900 dark:bg-primary rounded-full"></div>
+                </div>
+                <div className="flex justify-between text-xs text-gray-500 dark:text-muted-foreground">
+                  <span>Processing</span>
+                  <span>75%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Steps */}
+          <div className="space-y-12">
+            {steps.map((step, index) => {
+              const Icon = step.icon;
+              return (
+                <div key={index} className="flex gap-6 group">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-muted border border-gray-100 dark:border-border flex items-center justify-center text-gray-900 dark:text-foreground group-hover:bg-gray-900 dark:group-hover:bg-primary group-hover:text-white dark:group-hover:text-primary-foreground transition-colors duration-300">
+                      <Icon size={20} />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-foreground mb-2">
+                      {step.title}
+                    </h3>
+                    <p className="text-gray-500 dark:text-muted-foreground leading-relaxed">
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

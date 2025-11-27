@@ -1,71 +1,66 @@
 "use client";
-import React from 'react';
-import { motion } from 'framer-motion';
+
+import { CheckCircle2 } from "lucide-react";
 
 const benefits = [
   {
-    title: 'For Creators',
+    title: "For Creators",
+    description: "Maximize your earnings with every upload.",
     items: [
-      'Monetize your content directly',
-      'Work with top brands',
-      'Flexible campaign options',
-      'Real-time analytics'
-    ]
+      "Monetize every view automatically",
+      "No agency fees or hidden costs",
+      "Instant verification & payouts",
+      "Work with top global brands",
+    ],
   },
   {
-    title: 'For Brands',
+    title: "For Brands",
+    description: "Scale your reach with verifiable ROI.",
     items: [
-      'Access top creators',
-      'Performance-based pricing',
-      'Detailed campaign metrics',
-      'Brand safety controls'
-    ]
-  }
+      "AI-verified logo placement",
+      "Access to 50k+ vetted creators",
+      "Real-time campaign analytics",
+      "Pay only for verified views",
+    ],
+  },
 ];
 
 export default function Benefits() {
   return (
-    <section className="py-section bg-white">
-      <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {benefits.map((benefit, i) => (
-            <motion.div
-              key={i}
-              className="space-y-6"
-              initial={{ x: i === 0 ? -50 : 50, opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
+    <section id="benefits" className="py-24 md:py-32 bg-muted/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-4">
+            Why Choose Only Creators?
+          </h2>
+          <p className="text-lg text-muted-foreground">
+            Whether you're creating content or running campaigns, we've got you covered.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {benefits.map((benefit, index) => (
+            <div
+              key={index}
+              className="bg-card p-8 md:p-10 rounded-3xl shadow-sm border border-border hover:shadow-lg transition-all duration-300"
             >
-              <h3 className="text-2xl font-lexend-deca font-semibold text-brand-blue">
+              <div className="inline-block px-4 py-2 rounded-full text-sm font-bold mb-6 bg-primary/10 text-primary">
                 {benefit.title}
+              </div>
+              <h3 className="text-2xl font-semibold mb-4 text-foreground">
+                {benefit.description}
               </h3>
               <ul className="space-y-4">
-                {benefit.items.map((item, j) => (
-                  <motion.li
-                    key={j}
-                    className="flex items-center space-x-3"
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ delay: j * 0.1, duration: 0.5 }}
-                    viewport={{ once: true }}
-                  >
-                    <svg
-                      className="w-5 h-5 text-brand-teal"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span className="text-gray-700">{item}</span>
-                  </motion.li>
+                {benefit.items.map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <div className="mt-1 text-primary">
+                      <CheckCircle2 size={20} />
+                    </div>
+                    <span className="text-muted-foreground font-medium">{item}</span>
+                  </li>
                 ))}
               </ul>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

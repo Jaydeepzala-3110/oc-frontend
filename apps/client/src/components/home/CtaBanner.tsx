@@ -1,32 +1,28 @@
 "use client";
-import React from 'react';
-import { motion } from 'framer-motion';
+
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 export default function CtaBanner() {
   return (
-    <section className="py-20 bg-gradient-to-r from-brand-teal to-brand-blue">
-      <div className="container mx-auto px-6">
-        <motion.div
-          className="text-center text-white space-y-8"
-          initial={{ y: 50, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <h2 className="text-4xl font-lexend-deca font-bold">
-            Ready to Start Earning?
+    <section className="py-24 md:py-32 bg-white dark:bg-background border-t border-gray-100 dark:border-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 dark:text-foreground mb-6">
+            Ready to Monetize Your Content?
           </h2>
-          <p className="text-xl opacity-90 max-w-2xl mx-auto">
-            Join thousands of creators who are turning their passion into profit.
+          <p className="text-lg text-gray-500 dark:text-muted-foreground mb-10 max-w-2xl mx-auto">
+            Join thousands of creators earning from branded short-form videos. Start your journey
+            with Only Creators today.
           </p>
-          <motion.button
-            className="px-8 py-4 bg-brand-orange text-white rounded-full font-semibold text-lg hover:bg-opacity-90 transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <Link
+            href="/signup"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 dark:bg-primary text-white dark:text-primary-foreground rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-primary/90 transition-colors shadow-sm hover:shadow-md"
           >
-            Get Started Now
-          </motion.button>
-        </motion.div>
+            Start Creating Today
+            <ArrowRight size={16} />
+          </Link>
+        </div>
       </div>
     </section>
   );

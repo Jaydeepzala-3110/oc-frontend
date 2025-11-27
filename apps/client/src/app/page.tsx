@@ -1,29 +1,23 @@
-import Faqs from '@/components/home/Faqs';
-import HowItWork from '@/components/home/HowItWork';
-import Testimonials from '@/components/home/Testimonials';
-import Footer from '@/components/home/Footer';
-import BrandCarousel from '@/components/home/BrandCarousel';
-import Metrics from '@/components/home/Metrics';
-import FeaturedCampaigns from '@/components/home/FeaturedCampaigns';
-import Benefits from '@/components/home/Benefits';
-import CtaBanner from '@/components/home/CtaBanner';
-import Header from '@/components/home/Header';
-import HeroSection from '@/components/home/HeroSection';
-import GoalCards from '@/components/home/GoalCards';
+import Header from "@/components/home/Header";
+import HeroSection from "@/components/home/HeroSection";
+import Features from "@/components/home/Features";
+import MetricsTable from "@/components/home/MetricsTable";
+import ProcessFlow from "@/components/home/ProcessFlow";
+import HowItWork from "@/components/home/HowItWork";
+import Benefits from "@/components/home/Benefits";
+import CtaBanner from "@/components/home/CtaBanner";
+import Footer from "@/components/home/Footer";
 
 export default function Index() {
   return (
-    <main>
+    <main className="min-h-screen bg-white dark:bg-background font-sans">
       <Header />
       <HeroSection />
-      <BrandCarousel />
+      <Features />
+      <MetricsTable />
+      <ProcessFlow />
       <HowItWork />
-      {/* <Metrics /> */}
-      <GoalCards />
-      <FeaturedCampaigns />
-      <Testimonials />
       <Benefits />
-      <Faqs />
       <CtaBanner />
       <Footer />
     </main>
