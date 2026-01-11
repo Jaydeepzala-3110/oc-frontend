@@ -64,7 +64,7 @@ export default function Header() {
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary"></span>
           </button>
 
-          {/* User avatar */}
+          {/* Users avatar */}
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary via-secondary to-accent p-0.5">
               <div className="h-full w-full rounded-full bg-card flex items-center justify-center">

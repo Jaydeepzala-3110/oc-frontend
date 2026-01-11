@@ -8,7 +8,7 @@ import {
   DollarSign, 
   BarChart3, 
   Settings, 
-  User,
+  Users,
   LogOut,
   Menu
 } from "lucide-react";
@@ -20,7 +20,7 @@ const navigation = [
   { name: "Reels", href: "/dashboard/reels", icon: Video },
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { name: "Earnings", href: "/dashboard/earnings", icon: DollarSign },
-  { name: "Profile", href: "/dashboard/profile", icon: User },
+  { name: "Profile", href: "/dashboard/profile", icon: Users },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 

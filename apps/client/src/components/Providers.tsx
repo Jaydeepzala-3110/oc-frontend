@@ -2,6 +2,7 @@
 
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'sonner';
 import { store } from '@/store/store';
 import { useState } from 'react';
 
@@ -12,6 +13,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         staleTime: 60 * 1000, // 1 minute
         refetchOnWindowFocus: false,
       },
+      mutations: {
+        retry: 1,
+      },
     },
   }));
 
@@ -19,6 +23,12 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         {children}
+        <Toaster 
+          position="top-right"
+          richColors
+          closeButton
+          duration={4000}
+        />
       </QueryClientProvider>
     </Provider>
   );

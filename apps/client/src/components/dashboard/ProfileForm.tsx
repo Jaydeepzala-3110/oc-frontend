@@ -1,6 +1,6 @@
 "use client";
 
-import { User, Mail, Phone, Instagram, Loader2 } from "lucide-react";
+import { Users, Mail, Phone, Instagram, Loader2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { profileApi, type UpdateProfileData } from '@/api/profileApi';
 import { useState, useEffect } from 'react';
@@ -91,7 +91,7 @@ export default function ProfileForm() {
           <div className="space-y-4">
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-foreground mb-2">
-                <User className="w-4 h-4 inline mr-2" />
+                <Users className="w-4 h-4 inline mr-2" />
                 Username
               </label>
               <input
