@@ -15,7 +15,8 @@ export interface AuthResponse {
 }
 
 export interface SigninRequest {
-  email: string;
+  email?: string;
+  phoneNumber?: string;
   password: string;
 }
 

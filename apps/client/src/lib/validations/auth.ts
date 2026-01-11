@@ -36,12 +36,26 @@ export type SignupFormData = z.infer<typeof signupSchema>;
 export const signinSchema = z.object({
   email: z
     .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address')
+    .trim()
     .toLowerCase()
-    .trim(),
+    .optional()
+    .refine((val) => !val || z.string().email().safeParse(val).success, {
+      message: 'Please enter a valid email address',
+    }),
+  phoneNumber: z
+    .string()
+    .trim()
+    .optional()
+    .refine((val) => !val || /^\+?[1-9]\d{1,14}$/.test(val.replace(/\s+/g, '')), {
+      message: 'Please enter a valid phone number',
+    }),
   password: z.string().min(1, 'Password is required'),
-});
+}).refine(
+  (data) => data.email || data.phoneNumber,
+  {
+    message: 'Email or phone number is required',
+    path: ['email'], 
+  }
+);
 
 export type SigninFormData = z.infer<typeof signinSchema>;
-
