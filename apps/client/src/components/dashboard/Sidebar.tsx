@@ -10,7 +10,8 @@ import {
   Settings, 
   Users,
   LogOut,
-  Menu
+  Menu,
+  Megaphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -18,6 +19,7 @@ import { useState } from "react";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Reels", href: "/dashboard/reels", icon: Video },
+  { name: "Campaigns", href: "/dashboard/campaigns", icon: Megaphone },
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { name: "Earnings", href: "/dashboard/earnings", icon: DollarSign },
   { name: "Profile", href: "/dashboard/profile", icon: Users },
@@ -27,9 +29,9 @@ const navigation = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-
   return (
     <>
+
       {/* Mobile menu button */}
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
@@ -70,7 +72,7 @@ export default function Sidebar() {
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
+                    <item.icon className="h-5 w-5" /> 
                   {item.name}
                 </Link>
               );
