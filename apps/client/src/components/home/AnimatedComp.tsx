@@ -8,7 +8,14 @@ export default function AnimatedBackground() {
     const canvas :any = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    const particles = [];
+    interface Particle {
+      x: number;
+      y: number;
+      radius: number;
+      dx: number;
+      dy: number;
+    }
+    const particles: Particle[] = [];
     const numParticles = 40;
 
     const resizeCanvas = () => {

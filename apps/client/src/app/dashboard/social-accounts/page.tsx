@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { socialAccountsApi, SocialPlatform, SocialAccount, getInstagramConnectUrl } from '@/api/socialAccountsApi';
@@ -29,6 +29,18 @@ import {
 import { SocialAccountAvatar } from '@/components/social-accounts/SocialAccountAvatar';
 
 export default function SocialAccountsPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+        }>
+            <SocialAccountsContent />
+        </Suspense>
+    );
+}
+
+function SocialAccountsContent() {
     const queryClient = useQueryClient();
     const searchParams = useSearchParams();
     const [isAdding, setIsAdding] = useState(false);

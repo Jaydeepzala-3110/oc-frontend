@@ -43,7 +43,6 @@ export function LoginForm() {
 
 
     const isEmail = (str: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
-    const isPhoneNumber = (str: string) => /^\+?[1-9]\d{1,14}$/.test(str.replace(/\s+/g, ''));
 
     const parseIdentifier = (value: string) => {
         const clean = value.trim();
