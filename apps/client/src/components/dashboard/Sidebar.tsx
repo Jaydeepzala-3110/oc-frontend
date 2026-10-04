@@ -2,23 +2,25 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  Video, 
-  DollarSign, 
-  BarChart3, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Video,
+  DollarSign,
+  BarChart3,
+  Settings,
   Users,
   LogOut,
   Menu,
   Megaphone,
+  Instagram,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Reels", href: "/dashboard/reels", icon: Video },
+  { name: "My Reels", href: "/dashboard/reels", icon: Video },
+  { name: "Social Accounts", href: "/dashboard/social-accounts", icon: Instagram },
   { name: "Campaigns", href: "/dashboard/campaigns", icon: Megaphone },
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { name: "Earnings", href: "/dashboard/earnings", icon: DollarSign },
@@ -72,7 +74,7 @@ export default function Sidebar() {
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                 >
-                    <item.icon className="h-5 w-5" /> 
+                  <item.icon className="h-5 w-5" />
                   {item.name}
                 </Link>
               );

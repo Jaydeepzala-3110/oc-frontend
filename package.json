@@ -85,5 +85,8 @@
     "apps/*",
     "libs/*",
     "react-query"
-  ]
+  ],
+  "allowScripts": {
+    "nx@21.3.5": true
+  }
 }

@@ -37,9 +37,9 @@ const steps = [
 
 export default function HowItWork() {
   return (
-    <section id="how-it-works" className="py-24 bg-white dark:bg-background border-t border-gray-100 dark:border-border">
+    <section id="how-it-works" className="py-16 md:py-24 bg-white dark:bg-background border-t border-gray-100 dark:border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-16 items-start">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
           {/* Left Content */}
           <div className="lg:sticky lg:top-32">
             <h2 className="text-3xl font-semibold text-gray-900 dark:text-foreground mb-6">
@@ -76,7 +76,7 @@ export default function HowItWork() {
           </div>
 
           {/* Right Steps */}
-          <div className="space-y-12">
+          <div className="space-y-8 md:space-y-12">
             {steps.map((step, index) => {
               const Icon = step.icon;
               return (

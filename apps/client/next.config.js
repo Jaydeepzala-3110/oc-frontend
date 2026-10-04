@@ -11,7 +11,10 @@ const nextConfig = {
   // See: https://nx.dev/recipes/next/next-config-setup
   nx: {},
   images: {
-    domains: ['image.pngaaa.com'],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'image.pngaaa.com' },
+      { protocol: 'https', hostname: 'ui-avatars.com' },
+    ],
   },
 };
 

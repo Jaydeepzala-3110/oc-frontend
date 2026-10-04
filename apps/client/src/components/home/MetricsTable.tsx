@@ -39,11 +39,11 @@ const metricsData = [
 
 export default function MetricsTable() {
   return (
-    <section id="metrics" className="py-24 md:py-32 bg-muted/30">
+    <section id="metrics" className="py-16 md:py-32 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="mb-12">
-          <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-4">
+        <div className="mb-8 md:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
             Only Creators Analytics
           </h2>
           <p className="text-lg text-muted-foreground">

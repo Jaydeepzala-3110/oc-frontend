@@ -23,8 +23,43 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import {
+    calculateCampaignEarnings,
+    formatCampaignStatus,
+    formatEarningsFormula,
+    formatPayRate,
+    getCampaignStatusVariant,
+    parseRequirementItems,
+} from '@/lib/campaign-earnings';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+/** Mirrors oc-backend ValidationCheck — passed: null means "verified during review". */
+interface SubmissionCheck {
+    id: string;
+    label: string;
+    passed: boolean | null;
+    detail?: string;
+}
+
+interface SubmissionDetails {
+    source?: string;
+    username?: string;
+    permalink?: string;
+    mediaType?: string;
+    timestamp?: string;
+    rejectionCode?: string;
+    rejectionReason?: string;
+    checks?: SubmissionCheck[];
+    metrics?: {
+        views: number;
+        likes: number;
+        comments: number;
+        shares: number;
+        reach: number;
+        engagementPercent: number;
+    };
+}
 
 interface Campaign {
     id: number;
@@ -32,26 +67,30 @@ interface Campaign {
     description: string;
     image?: string;
     requirements: string;
+    requirementItems?: string[];
     budget: number;
     payRate: number;
     payUnit: string;
+    payRateLabel?: string;
     startDate: string;
     endDate: string;
+    minimumPostDate?: string;
+    campaignLink?: string;
+    telegramGroupLink?: string;
+    createdAt: string;
     platforms: string[];
     status: string;
+    canJoin?: boolean;
     isJoined?: boolean;
     participation?: {
         id: number;
         submissionUrl?: string;
         submissionStatus?: string;
-        submissionDetails?: {
-            allPassed: boolean;
-            checks: Array<{ id: string; label: string; passed: boolean; error?: string }>;
-            summary: string;
-        };
+        submissionDetails?: SubmissionDetails;
         submittedAt?: string;
         views?: number;
         earnings?: number;
+        projectedEarnings?: number;
         lastMetricsSync?: string;
     };
     client: {
@@ -137,10 +176,16 @@ export default function CampaignDetailsPage() {
             }
             return response.json();
         },
-        onSuccess: (data) => {
+        onSuccess: (data: { submissionStatus?: string; submissionDetails?: SubmissionDetails }) => {
             setValidationStep(3); // Result ready
             setTimeout(() => {
-                toast.success(data.submissionStatus === 'VERIFIED' ? 'Content verified!' : 'Content rejected.');
+                if (data.submissionStatus === 'VERIFIED') {
+                    toast.success('Content verified! Your views now count toward payouts.');
+                } else if (data.submissionStatus === 'PENDING') {
+                    toast.info('Submission accepted — it will be approved once it hits the minimum views.');
+                } else {
+                    toast.error(data.submissionDetails?.rejectionReason || 'Content rejected.');
+                }
                 queryClient.invalidateQueries({ queryKey: ['campaign', id] });
                 setIsValidating(false);
                 setValidationStep(0);
@@ -167,11 +212,25 @@ export default function CampaignDetailsPage() {
             <div className="max-w-2xl mx-auto mt-20 text-center p-12 bg-card rounded-3xl border border-border shadow-sm">
                 <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
                 <h2 className="text-2xl font-bold mb-2">Campaign Not Found</h2>
-                <p className="text-muted-foreground mb-8">The campaign you're looking for doesn't exist or you don't have access.</p>
+                <p className="text-muted-foreground mb-8">The campaign you&apos;re looking for doesn&apos;t exist or you don&apos;t have access.</p>
                 <Button size="lg" onClick={() => router.back()} className="rounded-xl">Go Back</Button>
             </div>
         );
     }
+
+    const requirementItems = parseRequirementItems(
+        campaign.requirements,
+        campaign.requirementItems,
+    );
+    const payLabel = campaign.payRateLabel ?? formatPayRate(campaign.payRate, campaign.payUnit);
+    const canJoin = campaign.canJoin ?? campaign.status === 'ACTIVE';
+    const submissionStatus = campaign.participation?.submissionStatus;
+    const submissionDetails = campaign.participation?.submissionDetails;
+    const participationViews = campaign.participation?.views ?? 0;
+    const participationEarnings = campaign.participation?.projectedEarnings
+        ?? campaign.participation?.earnings
+        ?? calculateCampaignEarnings(participationViews, campaign.payRate, campaign.payUnit);
+    const exampleEarnings = formatEarningsFormula(campaign.payRate, campaign.payUnit, 300_000);
 
     return (
         <div className="max-w-6xl mx-auto space-y-8 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -191,8 +250,8 @@ export default function CampaignDetailsPage() {
                                 {p}
                             </Badge>
                         ))}
-                        <Badge variant="outline" className="px-4 py-1.5 text-[10px] font-black border-border uppercase tracking-[0.2em] rounded-full">
-                            {campaign.status}
+                        <Badge variant={getCampaignStatusVariant(campaign.status)} className="px-4 py-1.5 text-[10px] font-black border-border uppercase tracking-[0.2em] rounded-full capitalize">
+                            {formatCampaignStatus(campaign.status)}
                         </Badge>
                     </div>
                     <h1 className="text-5xl md:text-7xl font-black text-foreground tracking-tight leading-[0.9] lg:max-w-[15ch]">
@@ -246,22 +305,19 @@ export default function CampaignDetailsPage() {
                                 <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                                     <Target className="h-5 w-5" />
                                 </div>
-                                <h2 className="text-2xl font-bold tracking-tight text-foreground">Participation Rules</h2>
+                                <h2 className="text-2xl font-bold tracking-tight text-foreground">Requirements</h2>
                             </div>
 
                             <div className="bg-card rounded-[3rem] border border-border overflow-hidden shadow-sm">
                                 <ol className="divide-y divide-border/50">
-                                    {campaign.requirements
-                                        .split(/[•.\n]/)
-                                        .filter(r => r.trim())
-                                        .map((req, i) => (
+                                    {requirementItems.map((req, i) => (
                                             <li key={i} className="flex gap-8 p-8 hover:bg-muted/30 transition-all group">
                                                 <div className="flex-shrink-0 h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-lg font-black text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
                                                     {i + 1}
                                                 </div>
                                                 <div className="pt-2 flex-1">
                                                     <p className="text-lg text-foreground font-semibold group-hover:text-primary transition-colors leading-snug">
-                                                        {req.trim()}
+                                                        {req}
                                                     </p>
                                                 </div>
                                             </li>
@@ -299,8 +355,11 @@ export default function CampaignDetailsPage() {
                                             <div className="h-12 w-12 rounded-2xl bg-green-500/5 flex items-center justify-center text-green-600">
                                                 <DollarSign className="h-6 w-6" />
                                             </div>
-                                            <h3 className="text-4xl font-black tracking-tighter text-green-600">${(campaign.participation.earnings || 0).toFixed(2)}</h3>
+                                            <h3 className="text-4xl font-black tracking-tighter text-green-600">${participationEarnings.toFixed(2)}</h3>
                                         </div>
+                                        <p className="text-xs text-muted-foreground mt-4 font-medium">
+                                            {formatEarningsFormula(campaign.payRate, campaign.payUnit, participationViews)}
+                                        </p>
                                     </div>
 
                                     <div className="p-8 rounded-[2.5rem] bg-card border border-border shadow-sm flex flex-col justify-center">
@@ -355,12 +414,17 @@ export default function CampaignDetailsPage() {
                                                 </div>
                                             </div>
 
-                                            {campaign.participation?.submissionStatus === 'REJECTED' && (
+                                            {submissionStatus === 'REJECTED' && (
                                                 <div className="p-6 rounded-2xl bg-destructive/5 border border-destructive/20 flex gap-4 items-center animate-in shake duration-500">
                                                     <AlertCircle className="h-6 w-6 text-destructive flex-shrink-0" />
                                                     <div className="space-y-1">
-                                                        <p className="text-sm font-bold text-destructive">Submission Rejected</p>
-                                                        <p className="text-xs text-destructive/70 font-medium">{campaign.participation?.submissionDetails?.summary}</p>
+                                                        <p className="text-sm font-bold text-destructive">
+                                                            Submission Rejected
+                                                            {submissionDetails?.rejectionCode && (
+                                                                <span className="ml-2 text-[10px] font-black uppercase tracking-widest opacity-60">{submissionDetails.rejectionCode.replaceAll('_', ' ')}</span>
+                                                            )}
+                                                        </p>
+                                                        <p className="text-xs text-destructive/70 font-medium">{submissionDetails?.rejectionReason ?? 'Your reel did not pass campaign validation.'}</p>
                                                     </div>
                                                 </div>
                                             )}
@@ -376,58 +440,103 @@ export default function CampaignDetailsPage() {
                                             </div>
                                             <div className="space-y-2">
                                                 <p className="text-xl font-black animate-pulse">
-                                                    {validationStep === 1 ? "SCANNING CONTENT..." :
-                                                        validationStep === 2 ? "ANALYZING RULES WITH AI..." :
+                                                    {validationStep === 1 ? "VERIFYING REEL OWNERSHIP..." :
+                                                        validationStep === 2 ? "CHECKING CAMPAIGN RULES..." :
                                                             "FINALIZING RESULTS..."}
                                                 </p>
-                                                <p className="text-sm text-muted-foreground font-medium">Checking DLS X SUGAR RUSH compliance standards</p>
+                                                <p className="text-sm text-muted-foreground font-medium">Validating against {campaign.title} requirements</p>
                                             </div>
                                         </div>
                                     ) : (
                                         <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
                                             <div className={cn(
                                                 "p-8 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-6",
-                                                campaign.participation?.submissionStatus === 'VERIFIED' ? "bg-green-500/10 border border-green-500/20" : "bg-destructive/10 border border-destructive/20"
+                                                submissionStatus === 'VERIFIED' && "bg-green-500/10 border border-green-500/20",
+                                                submissionStatus === 'PENDING' && "bg-amber-500/10 border border-amber-500/20",
+                                                submissionStatus === 'REJECTED' && "bg-destructive/10 border border-destructive/20"
                                             )}>
                                                 <div className="flex items-center gap-6">
                                                     <div className={cn(
                                                         "h-16 w-16 rounded-2xl flex items-center justify-center",
-                                                        campaign.participation?.submissionStatus === 'VERIFIED' ? "bg-green-500/20 text-green-600" : "bg-destructive/20 text-destructive"
+                                                        submissionStatus === 'VERIFIED' && "bg-green-500/20 text-green-600",
+                                                        submissionStatus === 'PENDING' && "bg-amber-500/20 text-amber-600",
+                                                        submissionStatus === 'REJECTED' && "bg-destructive/20 text-destructive"
                                                     )}>
-                                                        {campaign.participation?.submissionStatus === 'VERIFIED' ? <CheckCircle2 className="h-8 w-8" /> : <AlertCircle className="h-8 w-8" />}
+                                                        {submissionStatus === 'VERIFIED' ? <CheckCircle2 className="h-8 w-8" />
+                                                            : submissionStatus === 'PENDING' ? <Loader2 className="h-8 w-8 animate-spin" />
+                                                                : <AlertCircle className="h-8 w-8" />}
                                                     </div>
                                                     <div>
-                                                        <h4 className="text-xl font-bold">{campaign.participation?.submissionStatus === 'VERIFIED' ? 'Verification Passed' : 'Verification Failed'}</h4>
-                                                        <p className="text-sm font-medium opacity-70">Submitted on {new Date(campaign.participation?.submittedAt || '').toLocaleDateString()}</p>
+                                                        <h4 className="text-xl font-bold">
+                                                            {submissionStatus === 'VERIFIED' ? 'Verification Passed'
+                                                                : submissionStatus === 'PENDING' ? 'Pending Approval'
+                                                                    : 'Verification Failed'}
+                                                        </h4>
+                                                        <p className="text-sm font-medium opacity-70">
+                                                            {submissionStatus === 'PENDING'
+                                                                ? 'Valid reel — approval unlocks automatically when it reaches the minimum views. Synced hourly.'
+                                                                : submissionStatus === 'REJECTED' && submissionDetails?.rejectionReason
+                                                                    ? submissionDetails.rejectionReason
+                                                                    : `Submitted on ${new Date(campaign.participation?.submittedAt || '').toLocaleDateString()}`}
+                                                        </p>
                                                     </div>
                                                 </div>
-                                                {campaign.participation?.submissionStatus === 'VERIFIED' && (
+                                                {submissionStatus === 'VERIFIED' && (
                                                     <Badge className="bg-green-600 text-white font-black px-6 py-2 rounded-full border-none">ACTIVE FOR PAYOUTS</Badge>
+                                                )}
+                                                {submissionStatus === 'PENDING' && (
+                                                    <Badge className="bg-amber-500 text-white font-black px-6 py-2 rounded-full border-none">GATHERING VIEWS</Badge>
                                                 )}
                                             </div>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {campaign.participation?.submissionDetails?.checks.map((check: any, i: number) => (
-                                                    <div key={i} className="flex items-center justify-between p-5 rounded-2xl border border-border bg-muted/10 group transition-all hover:bg-muted/20">
-                                                        <div className="flex items-center gap-3">
+                                                {submissionDetails?.checks?.map((check, i) => (
+                                                    <div key={check.id ?? i} className="flex items-center justify-between gap-4 p-5 rounded-2xl border border-border bg-muted/10 group transition-all hover:bg-muted/20">
+                                                        <div className="flex items-center gap-3 min-w-0">
                                                             <div className={cn(
-                                                                "h-2 w-2 rounded-full",
-                                                                check.passed ? "bg-green-500" : "bg-destructive"
+                                                                "h-2 w-2 rounded-full flex-shrink-0",
+                                                                check.passed === true && "bg-green-500",
+                                                                check.passed === false && "bg-destructive",
+                                                                check.passed === null && "bg-amber-500"
                                                             )} />
-                                                            <p className="text-sm font-bold text-foreground/80 group-hover:text-foreground">{check.label}</p>
+                                                            <div className="min-w-0">
+                                                                <p className="text-sm font-bold text-foreground/80 group-hover:text-foreground truncate">{check.label}</p>
+                                                                {check.detail && (
+                                                                    <p className="text-[11px] font-medium text-muted-foreground truncate">{check.detail}</p>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                        {check.passed ?
-                                                            <CheckCircle2 className="h-4 w-4 text-green-500" /> :
-                                                            <div className="flex items-center gap-2 text-destructive">
+                                                        {check.passed === true ? (
+                                                            <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                                                        ) : check.passed === false ? (
+                                                            <div className="flex items-center gap-2 text-destructive flex-shrink-0">
                                                                 <span className="text-[10px] font-black uppercase">Failed</span>
                                                                 <AlertCircle className="h-4 w-4" />
                                                             </div>
-                                                        }
+                                                        ) : (
+                                                            <span className="text-[10px] font-black uppercase text-amber-600 flex-shrink-0">In Review</span>
+                                                        )}
                                                     </div>
                                                 ))}
                                             </div>
 
-                                            {campaign.participation?.submissionStatus !== 'VERIFIED' && (
+                                            {submissionDetails?.metrics && submissionStatus !== 'REJECTED' && (
+                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                    {([
+                                                        ['Views', submissionDetails.metrics.views],
+                                                        ['Likes', submissionDetails.metrics.likes],
+                                                        ['Comments', submissionDetails.metrics.comments],
+                                                        ['Engagement', `${submissionDetails.metrics.engagementPercent}%`],
+                                                    ] as const).map(([label, value]) => (
+                                                        <div key={label} className="p-4 rounded-2xl bg-muted/20 border border-border/50 text-center">
+                                                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{label}</p>
+                                                            <p className="text-lg font-black">{typeof value === 'number' ? value.toLocaleString('en-US') : value}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {submissionStatus === 'REJECTED' && (
                                                 <div className="flex justify-center">
                                                     <Button variant="outline" className="rounded-2xl border-dashed border-2 px-10 py-6 h-auto font-black text-sm uppercase tracking-widest hover:bg-muted/50 transition-all" onClick={() => {
                                                         setReelUrl('');
@@ -470,11 +579,30 @@ export default function CampaignDetailsPage() {
                             {/* Payout Metric */}
                             <div className="p-8 rounded-[2rem] bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-xl shadow-primary/20 relative overflow-hidden group">
                                 <div className="absolute -right-4 -top-4 h-24 w-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-3">Guaranteed Payout</p>
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-3">Pay Rate</p>
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-6xl font-black tracking-tighter">${campaign.payRate}</span>
+                                    <span className="text-3xl font-black tracking-tighter">{payLabel}</span>
                                 </div>
-                                <p className="text-xs font-bold opacity-90 mt-2 uppercase tracking-widest">per {campaign.payUnit.replace('PER_', '').toLowerCase()}</p>
+                                <p className="text-xs font-bold opacity-90 mt-4 uppercase tracking-widest">Example: {exampleEarnings}</p>
+                            </div>
+
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/30 border border-border/50">
+                                    <p className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">Status</p>
+                                    <Badge variant={getCampaignStatusVariant(campaign.status)} className="capitalize">
+                                        {formatCampaignStatus(campaign.status)}
+                                    </Badge>
+                                </div>
+                                {campaign.minimumPostDate && (
+                                    <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/30 border border-border/50">
+                                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">Minimum Post Date</p>
+                                        <p className="text-sm font-bold">{new Date(campaign.minimumPostDate).toLocaleDateString()}</p>
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/30 border border-border/50">
+                                    <p className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">Created At</p>
+                                    <p className="text-sm font-bold">{new Date(campaign.createdAt).toLocaleDateString()}</p>
+                                </div>
                             </div>
 
                             {/* Grid Metrics */}
@@ -503,14 +631,30 @@ export default function CampaignDetailsPage() {
                             </div>
 
                             <div className="space-y-4 pt-2">
+                                {campaign.campaignLink && (
+                                    <Button asChild variant="outline" className="w-full h-14 rounded-[1.25rem] font-bold">
+                                        <a href={campaign.campaignLink} target="_blank" rel="noopener noreferrer">
+                                            Visit Campaign
+                                            <ExternalLink className="ml-2 h-4 w-4" />
+                                        </a>
+                                    </Button>
+                                )}
+                                {campaign.telegramGroupLink && (
+                                    <Button asChild variant="outline" className="w-full h-14 rounded-[1.25rem] font-bold">
+                                        <a href={campaign.telegramGroupLink} target="_blank" rel="noopener noreferrer">
+                                            Join Telegram Group
+                                            <ExternalLink className="ml-2 h-4 w-4" />
+                                        </a>
+                                    </Button>
+                                )}
                                 <Button
                                     className={cn(
                                         "w-full h-16 rounded-[1.5rem] text-lg font-black transition-all shadow-xl tracking-tight",
-                                        !campaign.isJoined && "shadow-primary/30 hover:scale-[1.02] hover:shadow-2xl bg-primary hover:bg-primary/90"
+                                        canJoin && !campaign.isJoined && "shadow-primary/30 hover:scale-[1.02] hover:shadow-2xl bg-primary hover:bg-primary/90"
                                     )}
                                     onClick={() => joinMutation.mutate()}
-                                    disabled={isJoining || campaign.isJoined}
-                                    variant={campaign.isJoined ? "outline" : "default"}
+                                    disabled={isJoining || campaign.isJoined || !canJoin}
+                                    variant={campaign.isJoined ? "outline" : canJoin ? "default" : "secondary"}
                                 >
                                     {isJoining ? (
                                         <>
@@ -522,16 +666,25 @@ export default function CampaignDetailsPage() {
                                             <CheckCircle2 className="mr-2 h-5 w-5 text-green-500" />
                                             JOINED
                                         </>
-                                    ) : (
+                                    ) : canJoin ? (
                                         <>
                                             JOIN CAMPAIGN
                                             <ExternalLink className="ml-2 h-4 w-4" />
                                         </>
+                                    ) : (
+                                        <>NOT OPEN TO JOIN</>
                                     )}
                                 </Button>
-                                <p className="text-center text-[10px] text-muted-foreground px-6 leading-relaxed font-bold uppercase tracking-tighter opacity-70">
-                                    Secure your spot by applying early. Terms apply.
-                                </p>
+                                {!canJoin && !campaign.isJoined && (
+                                    <p className="text-center text-[10px] text-muted-foreground px-6 leading-relaxed font-bold uppercase tracking-tighter opacity-70">
+                                        Only active campaigns accept new clippers.
+                                    </p>
+                                )}
+                                {canJoin && (
+                                    <p className="text-center text-[10px] text-muted-foreground px-6 leading-relaxed font-bold uppercase tracking-tighter opacity-70">
+                                        Secure your spot by applying early. Terms apply.
+                                    </p>
+                                )}
                             </div>
                         </CardContent>
                     </Card>

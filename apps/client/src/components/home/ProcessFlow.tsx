@@ -89,7 +89,7 @@ export default function ProcessFlow() {
   };
 
   return (
-    <section className="py-24 md:py-32 bg-white dark:bg-background border-t border-gray-100 dark:border-border">
+    <section className="py-16 md:py-32 bg-white dark:bg-background border-t border-gray-100 dark:border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {processSteps.map((step, index) => {
           const Icon = step.icon;
@@ -97,7 +97,7 @@ export default function ProcessFlow() {
           return (
             <div
               key={index}
-              className="grid grid-cols-1 gap-12 md:grid-cols-4 md:gap-0 mb-24 last:mb-0"
+              className="grid grid-cols-1 gap-6 md:grid-cols-4 md:gap-0 mb-16 md:mb-24 last:mb-0"
             >
               {/* Left Side - Text */}
               <div className="col-span-2 my-auto px-2">
@@ -109,7 +109,7 @@ export default function ProcessFlow() {
                     className={`absolute top-1 -left-[8px] h-5 w-[3px] rounded-r-sm ${colors.bg}`}
                   ></div>
                 </h2>
-                <p className="mt-2 text-3xl font-semibold tracking-tighter text-balance text-gray-900 dark:text-foreground md:text-4xl">
+                <p className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tighter text-balance text-gray-900 dark:text-foreground md:text-4xl">
                   {step.title}
                 </p>
                 <p className="mt-4 text-balance text-gray-700 dark:text-muted-foreground leading-relaxed">
@@ -118,7 +118,7 @@ export default function ProcessFlow() {
               </div>
 
               {/* Right Side - SVG Diagram */}
-              <div className="relative col-span-2 flex items-center justify-center overflow-hidden min-h-[400px]">
+              <div className="relative col-span-2 flex items-center justify-center overflow-hidden min-h-[300px] sm:min-h-[400px]">
                 {/* Diagonal Pattern Background */}
                 <svg className="absolute size-full mask-[linear-gradient(transparent,white_10rem)] dark:mask-[linear-gradient(transparent,hsl(var(--background))_10rem)]">
                   <defs>
@@ -146,9 +146,9 @@ export default function ProcessFlow() {
                 </svg>
 
                 {/* Animated Diagram */}
-                <div className="pointer-events-none h-[400px] w-full p-10 select-none relative z-10 flex items-center justify-center">
+                <div className="pointer-events-none h-[300px] sm:h-[400px] w-full p-4 sm:p-10 select-none relative z-10 flex items-center justify-center">
                   <div
-                    className="relative flex items-center justify-center"
+                    className="relative flex items-center justify-center scale-[0.72] sm:scale-100 origin-center"
                     style={{ width: '312px', height: '312px' }}
                   >
                     {/* Pulsing Circle */}

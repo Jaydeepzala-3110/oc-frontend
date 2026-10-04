@@ -29,5 +29,18 @@ export const authStorage = {
   isAuthenticated: (): boolean => {
     return authStorage.getAccessToken() !== null;
   },
+
+  getUserIdFromToken: (): number | null => {
+    const token = authStorage.getAccessToken();
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const sub = payload.sub;
+      const id = typeof sub === 'number' ? sub : Number(sub);
+      return Number.isFinite(id) && id > 0 ? id : null;
+    } catch {
+      return null;
+    }
+  },
 };
 

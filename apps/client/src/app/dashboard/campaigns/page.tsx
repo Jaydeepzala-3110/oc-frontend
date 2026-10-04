@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CampaignCard } from '@/components/campaigns/CampaignCard';
 import { authStorage } from '@/lib/auth';
 import { toast } from 'sonner';
 import { Loader2, AlertCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ;
 
@@ -17,18 +18,22 @@ interface Campaign {
     budget: number;
     payRate: number;
     payUnit: string;
+    payRateLabel?: string;
     startDate: string;
     endDate: string;
     platforms: string[];
     status: string;
+    canJoin?: boolean;
     isJoined?: boolean;
 }
+
+type StatusFilter = 'ALL' | 'ACTIVE' | 'PAYMENT_PROCESSING' | 'OTHER';
 
 export default function CampaignsPage() {
     const queryClient = useQueryClient();
     const [joiningId, setJoiningId] = useState<number | null>(null);
+    const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
 
-    // Fetch campaigns
     const { data: campaigns, isLoading, error } = useQuery<Campaign[]>({
         queryKey: ['campaigns'],
         queryFn: async () => {
@@ -42,7 +47,6 @@ export default function CampaignsPage() {
         },
     });
 
-    // Join mutation
     const joinMutation = useMutation({
         mutationFn: async (campaignId: number) => {
             setJoiningId(campaignId);
@@ -72,6 +76,30 @@ export default function CampaignsPage() {
         },
     });
 
+    const filteredCampaigns = useMemo(() => {
+        if (!campaigns) return [];
+
+        return campaigns.filter((campaign) => {
+            if (statusFilter === 'ALL') return true;
+            if (statusFilter === 'ACTIVE') return campaign.status === 'ACTIVE';
+            if (statusFilter === 'PAYMENT_PROCESSING') return campaign.status === 'PAYMENT_PROCESSING';
+            return !['ACTIVE', 'PAYMENT_PROCESSING'].includes(campaign.status);
+        });
+    }, [campaigns, statusFilter]);
+
+    const statusCounts = useMemo(() => {
+        if (!campaigns) {
+            return { all: 0, active: 0, paymentProcessing: 0, other: 0 };
+        }
+
+        return {
+            all: campaigns.length,
+            active: campaigns.filter((c) => c.status === 'ACTIVE').length,
+            paymentProcessing: campaigns.filter((c) => c.status === 'PAYMENT_PROCESSING').length,
+            other: campaigns.filter((c) => !['ACTIVE', 'PAYMENT_PROCESSING'].includes(c.status)).length,
+        };
+    }, [campaigns]);
+
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px]">
@@ -97,27 +125,52 @@ export default function CampaignsPage() {
         );
     }
 
-    const activeCampaigns = campaigns?.filter(c => c.status === 'ACTIVE') || [];
+    const filters: { key: StatusFilter; label: string; count: number }[] = [
+        { key: 'ALL', label: 'All', count: statusCounts.all },
+        { key: 'ACTIVE', label: 'Active', count: statusCounts.active },
+        { key: 'PAYMENT_PROCESSING', label: 'Payment Processing', count: statusCounts.paymentProcessing },
+        { key: 'OTHER', label: 'Other', count: statusCounts.other },
+    ];
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-2">
-                    Available Campaigns
+                    Campaigns
                 </h1>
                 <p className="text-muted-foreground text-lg">
-                    Explore and join the best campaigns that match your niche.
+                    Browse every campaign and its status. Only active campaigns can be joined.
                 </p>
             </div>
 
-            {activeCampaigns.length === 0 ? (
+            <div className="flex flex-wrap gap-2">
+                {filters.map((filter) => (
+                    <button
+                        key={filter.key}
+                        type="button"
+                        onClick={() => setStatusFilter(filter.key)}
+                        className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                            statusFilter === filter.key
+                                ? 'border-primary bg-primary/10 text-primary'
+                                : 'border-border bg-card text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                        {filter.label}
+                        <Badge variant="secondary" className="rounded-full px-2 py-0 text-[10px]">
+                            {filter.count}
+                        </Badge>
+                    </button>
+                ))}
+            </div>
+
+            {filteredCampaigns.length === 0 ? (
                 <div className="text-center py-20 bg-card/50 rounded-2xl border border-border border-dashed">
-                    <p className="text-xl text-muted-foreground">No active campaigns available at the moment.</p>
-                    <p className="text-sm text-muted-foreground mt-2">Check back later for new opportunities!</p>
+                    <p className="text-xl text-muted-foreground">No campaigns match this filter.</p>
+                    <p className="text-sm text-muted-foreground mt-2">Try another status or check back later.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {activeCampaigns.map((campaign) => (
+                    {filteredCampaigns.map((campaign) => (
                         <CampaignCard
                             key={campaign.id}
                             campaign={campaign}
@@ -128,6 +181,12 @@ export default function CampaignsPage() {
                     ))}
                 </div>
             )}
+
+            <p className="text-sm text-muted-foreground">
+                Earnings follow Clipster-style math:{' '}
+                <span className="font-medium text-foreground">views × payout rate</span>{' '}
+                (e.g. $1,500 / 1M views × 300k views = $450).
+            </p>
         </div>
     );
 }
